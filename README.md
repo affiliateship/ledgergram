@@ -1,73 +1,9 @@
-# Developer Challenge
-
-Build a DApp on using FireFly.
-
-Fork this repo, choose a use case you think would be interesting to build as a decentralized application (DApp), then get creative and have fun.
-
-... and please **ask questions** - we don't want you to be stuck, and appreciate collaboration through the project.
-
-## What is a DApp?
-
-- [Ethereum Foundation](https://ethereum.org/en/developers/docs/dapps/)
-  - Background of how DApps have evolved in the wild, and why
-- [DApps Build on Ethereum](https://ethereum.org/en/dapps/)
-  - All that's been built in the wonderful world of public Ethereum
-- [FireFly docs](https://docs.kaleido.io/kaleido-platform/full-stack/dapps/)
-  - DApps in an Enterprise context
-
-## What does done look like?
-
-We would like your project to demonstrate your concept end-to-end, but it doesn't need to be a complete application.
-
-It must:
-
-- Have a Web based frontend user experience which talks to your app's backend
-- Have a backend-for-the-frontend (BFF), that uses FireFly's API
-  - Note: An SDK including API wrappers and a WebSocket event listener is provided for Node.js and includes type definitions for TypeScript. You are not required to use it, but we strongly recommend it as it will save you a lot of time.
-- Use Hyperledger FireFly
-- Have on-chain Smart Contract logic, written in Solidity
-- Contain a README that gives a quick overview of the use case, and tells us how to run it
-
-How much time you spend on each tier is down to you - depending on your interests and the skills you want to show.
-
-> We've given you a basic, but functional, starting point for each layer of the stack.
-> ... and yes, we know the UI is a bit naff ;-)
-
-## Some ideas
-
-These are just ideas to give inspiration
-
-Choose something/anything you think is interesting, and gives you license to focus on the bit of the stack you care about.
-
-It's your choice whether you focus more on how things work under the covers, or how things feel in the UI/UX.
-
-- A blockchain backed ratings system for Movies
-- A racing simulation (you can even see one here in our [Racecourse sample](https://github.com/kaleido-io/racecourse))
-- A funky avatar generator, where each avatar is backed by a unique token
-- A conference ticketing system with camera & QR code integration
-- A digital collectable swag bag, earned by posting to social media
-
-## Want more dev stack?
-
-Here are some dev technologies (not in the starter repo) that we love at Kaleido:
-
-- TailwindCSS or Material UI (or insert your favorite component library here) - at Kaleido we love re-use
-- GraphQL (Apollo) for front-end/back-end comms
-- WebSockets for live updating and notifications
-- PostgreSQL for relational data
-- MongoDB NoSQL database for configuration and local state
-
-Remember we'd like a thin thread through your DApp, so choose technologies you think you can be productive in.
-
-Want to throw away most of the original `vite` + `express` based repo?
-No problem. Go for it.
-
 ## Setting up your FireFly on your machine
 
 1. Install the [FireFly CLI here](https://github.com/hyperledger/firefly-cli?tab=readme-ov-file#install-the-cli)
 2. Create a FireFly stack by running:
    ```bash
-   ff init devChallenge --block-period 2 # Please set this. We expect you to use 2 second block period for this project (as real world blockchains are not instantaneous)
+   ff init dev --block-period 2 -p 5505 -n besu # Please set this. We expect you to use 2 second block period for this project (as real world blockchains are not instantaneous)
    ```
 3. Start the FireFly stack by running:
    ```bash
@@ -81,23 +17,212 @@ If you run into issues, use the following resources to help:
 
 1. [FireFly Getting Started Guide](https://hyperledger.github.io/firefly/latest/gettingstarted/firefly_cli/)
 2. [FireFly CLI README](https://github.com/hyperledger/firefly-cli)
-3. Ask the team in Whatsapp!
 
 ## Getting this repo up and running
 
 This repo has three directories in it:
 
 - `solidity`: Two example solidity contracts that can be compiled, tested, and deployed with Hardhat. [Go to the Readme](./solidity/)
-- `backend`: A very simple TypeScript Node.js app that uses the FireFly SDK to interact with a custom smart contract. [Go to the Readme](./backen/)
+- `backend`: A very simple TypeScript Node.js app that uses the FireFly SDK to interact with a custom smart contract. [Go to the Readme](./backend/)
 - `frontend`: A TypeScript React UI bootstrapped with [vite](https://vitejs.dev/guide/) that calls the API in the backend. [Go to the Readme](./frontend/)
 
-You will need to first deploy the example smart contracts with Hardhat to FireFly. Once the backend/frontend are started, the buttons on the Web UI will call the backend API endpoints to interact with the contracts through FireFly.
+You will need to first deploy the smart contracts with Hardhat to FireFly. Once the backend/frontend are started, the buttons on the Web UI will call the backend API endpoints to interact with the contracts through FireFly.
 
-![Backend](backend.png)
-![Frontend](frontend.png)
+# LedgerGram — Architecture & Design Overview
 
-## Your journey begins here
+LedgerGram is a lightweight social feed application where posts and likes are **anchored on-chain** while the user experience remains fast and familiar. The system uses **FireFly as a blockchain abstraction layer**, enabling reliable event-driven synchronization between smart contracts and the application backend.
 
-Now it's your turn to build something! You can use this backend and frontend as a starting point for your app, or you can start from scratch if you want.
+---
 
-You will find the [FireFly documentation](https://hyperledger.github.io/firefly/latest/) useful as you build this project.
+## 🧱 High-Level Architecture
+
+### Components
+
+**Frontend (React + MUI)**
+
+* Displays feed, profile, posts, and likes
+* Supports periodic polling
+* Communicates with backend via REST APIs
+
+**Backend (Node.js + TypeORM)**
+
+* Exposes REST APIs for posts, likes, and feeds
+* Persists posts in PostgreSQL
+* Submits blockchain transactions via FireFly
+
+**FireFly**
+
+* Abstracts blockchain interactions
+* Submits smart contract transactions
+* Listens for blockchain events
+* Delivers normalized event data to backend
+
+**Blockchain (EVM)**
+
+* Stores canonical record of posts and likes
+* Emits events for post creation and likes
+* Provides immutability and auditability
+
+**Database (PostgreSQL)**
+
+* Caches feed state for fast reads
+* Stores transaction hashes and block references
+* 
+
+---
+
+## 🔁 Data Flow
+
+### Creating an Account
+1. User fill out registration form
+2. User submits form
+3. Backend persist user information
+4. User information will be stored in the browser
+
+### Creating a Post
+
+1. User submits a post from the UI
+2. Backend sends a transaction request to FireFly
+3. Smart contract emits `PostCreated` event
+4. FireFly captures and forwards the event
+5. Backend persists the post with:
+   * postId
+   * transactionHash
+   * blockNumber
+6. UI reconciles on refresh
+
+### Liking a Post
+
+1. User taps “Like”
+3. Backend submits like transaction via FireFly
+4. Smart contract emits `PostLiked` event
+5. Backend updates like count
+6. UI updates immediately through refresh
+
+---
+
+## 🔐 Blockchain Referencing Strategy
+
+The application **does not reference blocks directly**.
+
+Instead, each on-chain action is anchored using:
+
+* **Transaction hash**
+* **Block number (optional but stored)**
+* **Event metadata**
+
+This provides:
+
+* Verifiable on-chain proof
+* Easy debugging and auditing
+* Blockchain-agnostic extensibility
+
+---
+
+## 🗄️ Data Model (Simplified)
+
+**Post**
+
+* postId
+* accountId
+* content
+* likeCount
+* transactionHash
+* blockNumber
+* createdAt
+
+**Account**
+
+* accountId
+* firstName
+* lastName
+* username
+* hashPassword
+* createdAt
+
+## 🌐 API Design
+
+### Accounts
+
+**Create Account**
+
+* POST `/register`
+* Create new account
+
+**Login**
+
+* POST `/login`
+* Login using username and password
+
+---
+
+### Posts
+
+**Create Post**
+
+* POST `/posts`
+* Submits a blockchain transaction
+* Returns immediately for optimistic UI
+
+**Get Feed**
+
+* GET `/posts`
+* Returns cached posts ordered by creation time
+* Supports periodic polling and pull-to-refresh
+
+---
+
+**Like Post**
+
+* PUT `/posts/{postId}`
+* Increase the like count of a post
+
+---
+
+## ⚡ Performance & UX Decisions
+
+### Eventual Consistency
+
+* UI updates on refresh
+* Polling every 5 seconds for new data
+
+---
+
+## 🧠 Key Design Choices
+
+### Why FireFly?
+
+* Abstracts blockchain complexity
+* Provides reliable event delivery
+* Simplifies transaction lifecycle management
+
+### Why Not Read Directly From Chain?
+
+* Blockchain reads are slow and expensive
+* Poor UX for feeds and pagination
+* Database enables scalable reads
+
+### Why Store Transaction Hashes?
+
+* Enables on-chain verification
+* Provides auditability
+* Decouples UI from blockchain specifics
+
+---
+
+## 🛡️ Consistency & Safety
+
+* Backend enforces idempotency
+* Blockchain remains the source of truth
+* Events drive state reconciliation
+
+---
+
+## 🚀 Future Improvements
+
+* WebSocket-based feed updates
+* Optimistic UI update
+* Supports pull-to-refresh
+* Enables pagination, sorting, and filtering
+* Prevents double likes per user
+

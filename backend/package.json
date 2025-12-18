@@ -8,7 +8,10 @@
     "build": "tsc",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
     "prestart": "npm run build",
-    "start": "node build/index.js"
+    "start": "node build/index.js",
+    "typeorm": "node --require ts-node/register ./node_modules/typeorm/cli.js",
+    "createmigration": "npx typeorm migration:generate -n migration -d src/data/migration",
+    "runmigration": "npx typeorm migration:run"
   },
   "repository": {
     "type": "git",
@@ -26,21 +29,29 @@
   "homepage": "https://github.com/kaleido-io/frontend-challenge#readme",
   "dependencies": {
     "@hyperledger/firefly-sdk": "^1.2.16",
-    "body-parser": "^1.20.2",
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
     "express": "^4.18.2",
     "nanoid": "^5.0.4",
-    "uuid": "^9.0.1"
+    "pg": "^8.16.3",
+    "typeorm": "^0.3.28",
+    "uuid": "^9.0.1",
+    "winston": "^3.19.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.1.1",
+    "@types/bcrypt": "^5.0.0",
     "@types/body-parser": "^1.19.5",
+    "@types/cors": "^2.8.19",
     "@types/express": "^4.17.21",
     "@types/node": "^20.11.5",
     "@types/uuid": "^9.0.7",
     "@types/ws": "^8.5.10",
     "eslint": "^8.57.0",
     "globals": "^15.1.0",
-    "typescript": "^5.3.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
     "typescript-eslint": "^7.8.0"
   }
 }
