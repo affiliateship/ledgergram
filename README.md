@@ -186,7 +186,7 @@ This provides:
 ### Eventual Consistency
 
 * UI updates on refresh
-* Polling every 5 seconds for new data
+* Polling every 10 seconds for new data
 
 ---
 
