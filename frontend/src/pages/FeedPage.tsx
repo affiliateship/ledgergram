@@ -1,12 +1,12 @@
 import { Container, Grid, Fab, Card, CardContent, Box, Typography, Avatar, Chip } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
-import PostCard from '../components/PostCard'
 import CreatePostDialog from '../components/CreatePostDialog'
 import { useEffect, useState } from 'react'
 import { Post } from '../types/Post'
 import { createAPI, fetchFeed, updatePost } from '../hooks/authAPI'
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { User } from '../types/User'
+import ModernPostCard from '../components/ModernPostCard'
 
 export default function FeedPage() {
     const [posts, setPosts] = useState<Post[]>([])
@@ -79,7 +79,7 @@ return (
       <Grid container spacing={1}>
         {posts.map((p) => (
           <Grid item xs={12} key={p.postId}>
-            <PostCard post={p} onLike={() => likePost(p.postId)} />
+            <ModernPostCard post={p} onLike={() => likePost(p.postId)}/>
           </Grid>
         ))}
       </Grid>
