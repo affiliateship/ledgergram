@@ -1,3 +1,9 @@
+# LedgerGram — Architecture & Design Overview
+
+LedgerGram is a lightweight social feed application where posts and likes are **anchored on-chain** while the user experience remains fast and familiar. The system uses **FireFly as a blockchain abstraction layer**, enabling reliable event-driven synchronization between smart contracts and the application backend.
+
+---
+
 ## Setting up your FireFly on your machine
 
 1. Install the [FireFly CLI here](https://github.com/hyperledger/firefly-cli?tab=readme-ov-file#install-the-cli)
@@ -27,10 +33,6 @@ This repo has three directories in it:
 - `frontend`: A TypeScript React UI bootstrapped with [vite](https://vitejs.dev/guide/) that calls the API in the backend. [Go to the Readme](./frontend/)
 
 You will need to first deploy the smart contracts with Hardhat to FireFly. Once the backend/frontend are started, the buttons on the Web UI will call the backend API endpoints to interact with the contracts through FireFly.
-
-# LedgerGram — Architecture & Design Overview
-
-LedgerGram is a lightweight social feed application where posts and likes are **anchored on-chain** while the user experience remains fast and familiar. The system uses **FireFly as a blockchain abstraction layer**, enabling reliable event-driven synchronization between smart contracts and the application backend.
 
 ---
 
